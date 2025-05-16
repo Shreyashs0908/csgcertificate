@@ -24,53 +24,68 @@ async function generateCertificate(certificateData) {
       fs.mkdirSync(certificatesDir, { recursive: true });
     }
     
+    // Path to certificate template image
+    const certificateImagePath = path.join(__dirname, '../templates/images/Certificate.jpg');
+    
     // Create PDF
     const pdfPath = path.join(certificatesDir, `${certificateId}.pdf`);
     const doc = new PDFDocument({
       size: 'A4',
-      margin: 50
+      margin: 50,
+      layout: 'landscape' // Most certificates look better in landscape mode
     });
     
     // Pipe the PDF to a file
     doc.pipe(fs.createWriteStream(pdfPath));
     
-    // Add border
-    doc.rect(20, 20, doc.page.width - 40, doc.page.height - 40)
-       .lineWidth(3)
-       .stroke('#1a5276');
+    // Add certificate background image
+    doc.image(certificateImagePath, 0, 0, {
+      width: doc.page.width,
+      height: doc.page.height,
+      align: 'center',
+      valign: 'center'
+    });
     
-    // Add title
-    doc.fontSize(30)
+    // Calculate positions based on the page dimensions
+    const centerX = doc.page.width / 2;
+    const startY = doc.page.height * 0.35; // Adjust this value to position text properly
+    
+    // Set the initial y position
+    let currentY = startY;
+    
+    // Add name (centered and prominent)
+    doc.fontSize(32)
        .font('Helvetica-Bold')
        .fillColor('#1a5276')
-       .text('Certificate of Completion', { align: 'center' })
-       .moveDown(1);
+       .text(name, centerX - 200, currentY, {
+         width: 400,
+         align: 'center'
+       });
     
-    // Add description
-    doc.fontSize(16)
-       .font('Helvetica')
-       .fillColor('#2c3e50')
-       .text('This is to certify that', { align: 'center' })
-       .moveDown(0.5);
-    
-    // Add name
-    doc.fontSize(24)
-       .font('Helvetica-Bold')
-       .fillColor('#1a5276')
-       .text(name, { align: 'center' })
-       .moveDown(0.5);
+    currentY += 80; // Move down for the next text element
     
     // Add completion text
     doc.fontSize(16)
        .font('Helvetica')
        .fillColor('#2c3e50')
-       .text('has successfully completed the CSG course', { align: 'center' })
-       .moveDown(2);
+       .text('has successfully completed the CSG course', centerX - 200, currentY, {
+         width: 400,
+         align: 'center'
+       });
+    
+    currentY += 60; // Move down for certificate details
+    
+    // Add certificate details in a smaller font
+    doc.fontSize(12)
+       .fillColor('#2c3e50');
     
     // Add certificate ID
-    doc.fontSize(12)
-       .text(`Certificate ID: ${certificateId}`, { align: 'center' })
-       .moveDown(0.5);
+    doc.text(`Certificate ID: ${certificateId}`, centerX - 200, currentY, {
+      width: 400,
+      align: 'center'
+    });
+    
+    currentY += 20;
     
     // Add issue date
     const formattedIssueDate = new Date(issueDate).toLocaleDateString('en-US', {
@@ -78,8 +93,12 @@ async function generateCertificate(certificateData) {
       month: 'long',
       day: 'numeric'
     });
-    doc.text(`Issue Date: ${formattedIssueDate}`, { align: 'center' })
-       .moveDown(0.5);
+    doc.text(`Issue Date: ${formattedIssueDate}`, centerX - 200, currentY, {
+      width: 400,
+      align: 'center'
+    });
+    
+    currentY += 20;
     
     // Add expiry date
     const formattedExpiryDate = new Date(expiryDate).toLocaleDateString('en-US', {
@@ -87,19 +106,10 @@ async function generateCertificate(certificateData) {
       month: 'long',
       day: 'numeric'
     });
-    doc.text(`Valid Until: ${formattedExpiryDate}`, { align: 'center' })
-       .moveDown(3);
-    
-    // Add signature
-    doc.fontSize(14)
-       .font('Helvetica-Oblique')
-       .text('CSG Authorized Signature', { align: 'center' });
-    
-    // Add horizontal line for signature
-    const signatureY = doc.y - 30;
-    doc.moveTo(doc.page.width / 2 - 100, signatureY)
-       .lineTo(doc.page.width / 2 + 100, signatureY)
-       .stroke();
+    doc.text(`Valid Until: ${formattedExpiryDate}`, centerX - 200, currentY, {
+      width: 400,
+      align: 'center'
+    });
     
     // Add metadata
     doc.info.Title = `CSG Certificate - ${name}`;
