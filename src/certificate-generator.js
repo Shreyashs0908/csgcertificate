@@ -48,40 +48,40 @@ async function generateCertificate(certificateData) {
     
     // Calculate positions based on the page dimensions
     const centerX = doc.page.width / 2;
-    const startY = doc.page.height * 0.35; // Adjust this value to position text properly
     
-    // Set the initial y position
-    let currentY = startY;
+    // Adjust these values based on the specific certificate image
+    const nameY = doc.page.height * 0.38; // Position for the name - moved higher
+    const completionTextY = doc.page.height * 0.46; // Position for completion text - moved higher
+    const detailsStartY = doc.page.height * 0.58; // Position for certificate details - moved higher
     
     // Add name (centered and prominent)
     doc.fontSize(32)
        .font('Helvetica-Bold')
        .fillColor('#1a5276')
-       .text(name, centerX - 200, currentY, {
-         width: 400,
+       .text(name, 0, nameY, {
+         width: doc.page.width,
          align: 'center'
        });
-    
-    currentY += 80; // Move down for the next text element
     
     // Add completion text
-    doc.fontSize(16)
+    doc.fontSize(18)
        .font('Helvetica')
        .fillColor('#2c3e50')
-       .text('has successfully completed the CSG course', centerX - 200, currentY, {
-         width: 400,
+       .text('has successfully completed the CSG course', 0, completionTextY, {
+         width: doc.page.width,
          align: 'center'
        });
     
-    currentY += 60; // Move down for certificate details
+    // Set position for certificate details
+    let currentY = detailsStartY;
     
     // Add certificate details in a smaller font
-    doc.fontSize(12)
+    doc.fontSize(14)
        .fillColor('#2c3e50');
     
     // Add certificate ID
-    doc.text(`Certificate ID: ${certificateId}`, centerX - 200, currentY, {
-      width: 400,
+    doc.text(`Certificate ID: ${certificateId}`, 0, currentY, {
+      width: doc.page.width,
       align: 'center'
     });
     
@@ -93,8 +93,8 @@ async function generateCertificate(certificateData) {
       month: 'long',
       day: 'numeric'
     });
-    doc.text(`Issue Date: ${formattedIssueDate}`, centerX - 200, currentY, {
-      width: 400,
+    doc.text(`Issue Date: ${formattedIssueDate}`, 0, currentY, {
+      width: doc.page.width,
       align: 'center'
     });
     
@@ -106,8 +106,8 @@ async function generateCertificate(certificateData) {
       month: 'long',
       day: 'numeric'
     });
-    doc.text(`Valid Until: ${formattedExpiryDate}`, centerX - 200, currentY, {
-      width: 400,
+    doc.text(`Valid Until: ${formattedExpiryDate}`, 0, currentY, {
+      width: doc.page.width,
       align: 'center'
     });
     
